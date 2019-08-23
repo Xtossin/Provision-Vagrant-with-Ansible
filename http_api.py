@@ -9,6 +9,7 @@ header_auth_token = raw_input("Enter authentication token header (tip call /auth
 auth_url = base_url + '/auth'
 users_url = base_url + '/users'
 
+
 def endpoint_fails(base_url, max_attempts=3, **kwargs):
     attempts = 0
     while attempts < max_attempts:
@@ -47,7 +48,7 @@ def users():
     token = auth_token()
     check_sum = auth_checksum(token=token)
     users_b = user_ids(check_sum=check_sum)
-    print(json.dumps(users_b.splitlines()))
+    print (json.dumps(users_b.splitlines(), indent=4, separators=(': ', ',')))
     exit(0)
 
 
