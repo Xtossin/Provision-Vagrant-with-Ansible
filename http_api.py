@@ -9,10 +9,6 @@ header_auth_token = raw_input("Enter authentication token header (tip call /auth
 auth_url = base_url + '/auth'
 users_url = base_url + '/users'
 
-req = requests.get(auth_url)
-print(req.headers)
-
-
 def endpoint_fails(base_url, max_attempts=3, **kwargs):
     attempts = 0
     while attempts < max_attempts:
