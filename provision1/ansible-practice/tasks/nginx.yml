@@ -1,0 +1,61 @@
+---
+- name: install nginx repo
+  yum_repository:
+    name: nginx
+    description: official nginx repo
+    baseurl: http://nginx.org/packages/centos/$releasever/$basearch/
+    gpgcheck: 1
+    gpgkey: https://nginx.org/keys/nginx_signing.key
+
+- name: install latest nginx from official repo
+  yum:
+    name: nginx
+    state: present
+
+- name: start nginx
+  service: name=nginx state=started
+
+- name: install the nginx config
+  copy:
+    src: config/nginx.conf
+    dest: /etc/nginx/nginx.conf
+    owner: root
+    group: root
+    mode: 0644
+  register: config_changed
+
+- name: cert directory
+  file:
+    path: /etc/nginx/cert
+    state: directory
+    owner: root
+    group: root
+    mode: 0700
+
+- name: build dhparam.pem
+  command: "openssl dhparam -out /etc/nginx/dhparam.pem 4096"
+  args:
+    creates: /etc/nginx/dhparam.pem
+
+- name: copy ssl_certificate
+  copy:
+    src: files/self-signed.crt
+    dest: /etc/nginx/cert/self-signed.crt
+    mode: 0600
+
+- name: copy ssl_certificate_key
+  copy:
+    src: files/self-signed.key
+    dest: /etc/nginx/cert/self-signed.key
+    mode: 0600
+
+- name: check config
+  command: "/usr/sbin/nginx -t"
+  when: config_changed.changed
+  register: config_validated
+
+- name: reload nginx
+  service:
+    name: nginx
+    state: reloaded
+  when: config_validated.changed

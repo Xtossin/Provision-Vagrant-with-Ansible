@@ -1,0 +1,54 @@
+---
+- name: unarchive and copy application to directory /opt/application
+  unarchive:
+    src: application.zip
+    dest: /opt
+
+- name: set application directory permissions
+  file:
+    path: /opt/application
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+
+- name: configure runit repo
+  yum_repository:
+    name: imeyer_runit
+    description: https://packagecloud.io/imeyer/runit
+    baseurl: https://packagecloud.io/imeyer/runit/el/6/$basearch
+    # loud packages are not signed
+    gpgcheck: 0
+    #gpgkey: https://packagecloud.io/imeyer/runit/gpgkey
+
+- name: runit installation
+  yum:
+    name: runit-2.1.2-1.el6.x86_64
+    state: present
+
+- name: create /etc/sv/application
+  file:
+    path: /etc/sv/application
+    state: directory
+    owner: root
+    group: root
+    recurse: yes
+
+- name: create /etc/service
+  file:
+    path: /etc/service
+    state: directory
+    owner: root
+    group: root
+
+- name: link the run script
+  file:
+    src: /opt/application/run
+    dest: /etc/sv/application/run
+    state: link
+
+- name: link the service
+  file:
+    src: /etc/sv/application
+    dest: /etc/service/application
+    state: link
